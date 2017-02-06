@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>PMN Photo-Slide Generator</title>
+    <meta name="author" content="Jared Whalen">
+    <meta content="Create beautiful full-frame photo galleries." />
+    <link href="css/project.css" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+    <script src="js/project.js"></script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <p id="heading">PMN: Photo-Slide Generator Ver. 1.0</p>
+        <p class="bodyText" style="margin-top: -15px;">Use this tool to create beautiful full-frame photo galleries.
+            <hr />
+
+            <div class="step" id="step-1">
+                <p class="bodyText"><strong>1.</strong> Get started by either <a href="https://docs.google.com/spreadsheets/d/1jNeXQl9UhsZHJHc2EkmGI6tEyodI4YpBPAsjl1ei9JI/export?format=csv ">downloading the template CSV file here</a> or by copying and pasting the table row
+                    below into an Excel sheet. <strong>DO NOT CHANGE THE HEADER. Even changing capitalization will break the code.</strong> </p>
+                <table class="table table-bordered table-hover table-condensed gridtable">
+                    <tr>
+                        <td title="Field #1">imageURL</td>
+                        <td title="Field #2">text</td>
+                        <td title="Field #3">textPosition</td>
+                        <td title="Field #4">subhead</td>
+                        <td title="Field #5">byline</td>
+                        <td title="Field #6">publishDate</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="step" id="step-2">
+                <p class="bodyText"><strong>2.</strong> Fill in the CSV with all relevant information. Each row renders as a slide. Plain text can be entered in manually or pasted from Microsoft Word or Google Docs. You can leave any field blank if needed, for example if
+                    you want an image slide with no text.</p>
+                <p class="bodyText"><strong>SAVE YOUR CSV FILE.</strong> It will be much easier for you to make edits in the CSV file and merely run the tool again than attempt to edit the code. The Copy Desk should be editing the CSV file, not the raw code in Clickability.</p>
+                <p class="bodyText">If the <span class="cell">Text</span> field of a list item requires <strong>multiple paragraphs</strong>, you will need to wrap each paragraph in <span class="code">&lt;p&gt;</span> tags. Otherwise your text will appear as a single block.
+                    You can do this manually or by using <a target="_blank" href="http://pdn.philly.com/mt_scripts/dehermenator.html">this tool</a> to convert your plain text into <span class="code">html</span>.</p>
+                <p class="bodyText">Paste image links directly into the <span class="cell">Image</span> column. Any part of the list item can function as a hyperlink, but they must be <strong>MUST</strong> be inserted as inline <span class="code">&lt;a&gt;</span> tags and
+                    formatted like <span class="code">&lta target='_blank' href='<em>URL</em>'&gt;HYPERLINK&lt/a&gt;</span>.</p>
+                <p class="bodyText">You can use the tool below to convert URLs to <span class="code">&lt;a&gt;</span> tags.<br> <strong>&#9672; Hyperlinked text: <input type="text" value="" id="textLink"> URL:</strong> <input type="text" value="" id="url">
+                    <input type="submit" id="urlSubmit" value="Convert"><br>
+                    <div id="urlConvertContainer"></div>
+                </p>
+            </div>
+            <div class="step" id="step-3">
+                <p class="bodyText"><strong>3.</strong> Once finished, select all (CTRL+A) and copy (CTRL+C) the CSV contents and paste data in the field below and click "Convert".</p><textarea id="csv" class="textarea"></textarea> </div>
+            <button id="convert" class="button">Convert</button>
+            <div class="step" id="step-4">
+                <p class="bodyText"><strong>4.</strong> Copy the code in the form below and paste it into the HTML Source Editor of a Page Miscellaneous in Clickability.</p>
+<textarea id="json" class="textarea json">
+
+
+
+
+  $(".control-button").hide();
+  $(".controls-container").css("pointer-events", "none");
+
+  $.each(data, function(i, value) {
+      console.log(data[i].imageURL);
+      var imageURL = data[i].imageURL,
+          text = data[i].text,
+          textPosition = data[i].textPosition,
+          subhead = data[i].subhead,
+          byline = data[i].byline,
+          publishDate = data[i].publishDate;
+      if (i == 0) {
+          var slides = '<div class="slide" style="background-image:url(' + imageURL + ')">';
+          slides += '<div class="text-container text-container-headline">';
+          slides += '<div class="text text-headline">';
+          slides += '<div class="headline">' + text + '</div>';
+          slides += '<div class="subhead">' + subhead + '</div>';
+          slides += '<div class="byline">' + byline + '</div>';
+          slides += '<div class="publishDate">' + publishDate + '</div>';
+          slides += '<button class="start">Start</button>';
+          slides += '</div>';
+          slides += '</div>';
+          slides += '</div>';
+          $(".slide-deck").append(slides);
+      }
+      if (i > 0 && i < (data.length - 1)) {
+          var slides = '<div class="slide" style="background-image:url(' + imageURL + ')">';
+          slides += '<div class="text-container text-container-' + textPosition + '">';
+          slides += '<div class="text text-' + textPosition + '">';
+          slides += '<p>' + text + '</p>';
+          slides += '</div>';
+          slides += '</div>';
+          slides += '</div>';
+          $(".slide-deck").append(slides);
+      }
+      if (i == (data.length - 1)) {
+          var slides = '<div class="slide" style="background-image:url(' + imageURL + ')">';
+          slides += '<div class="text-container text-container-' + textPosition + '">';
+          slides += '<div class="text text-' + textPosition + '">';
+          slides += '<div class="credits">The End</div>';
+          slides += '</div>';
+          slides += '</div>';
+          slides += '</div>';
+          $(".slide-deck").append(slides);
+      }
+  });
+
+
+  //get viewport height
+  var vh = $(window).height();
+  console.log(vh);
+  $(".slide-deck").css("height", vh);
+  //set array
+  var i = 0,
+      array = $('.slide'),
+      arrayLength = array.length;
+  array.hide();
+  var slide = $('.slide').eq(i);
+  slide.show();
+  console.log(array[i]); // your initial value
+  // the next line, of course, assumes you have an element with id="next"
+
+  function update() {
+      if (i == 0) {
+          $(".control-button").fadeOut();
+          $(".controls-container").css("pointer-events", "none");
+      }
+      if (i == arrayLength - 1) {
+          $("#next").fadeOut();
+          $(".controls-container").css("pointer-events", "auto");
+      }
+      if (i > 0 && i < arrayLength - 1) {
+          $(".control-button").fadeIn();
+          $(".controls-container").css("pointer-events", "auto");
+      }
+  }
+
+  $('.start').click(function() {
+      i = (i + 1) % arrayLength; // increment your i
+      // the modulus (%) operator resets the i to 0
+      // when it reaches the length of the array
+      console.log(array[i]); // the new incremented value
+      array.fadeOut(600);
+      $(array[i]).delay(100).fadeIn(1200);
+      update();
+  });
+
+  $('#next').click(function() {
+      i = (i + 1) % arrayLength; // increment your i
+      // the modulus (%) operator resets the i to 0
+      // when it reaches the length of the array
+      console.log(array[i]); // the new incremented value
+      array.hide();
+      $(array[i]).show();
+      update();
+  });
+  $('#prev').click(function() {
+      i = (i - 1) % arrayLength; // increment your i
+      // the modulus (%) operator resets the i to 0
+      // when it reaches the length of the array
+      console.log(array[i]); // the new incremented value
+      array.hide();
+      $(array[i]).show();
+      update();
+  });
+});
+&lt;/script&gt
+
+&lt;style&gt
+body {
+    display: block;
+    margin: 0px;
+}
+
+.slide-deck-container {
+    position: relative;
+    min-height: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    overflow-y: auto;
+    background-color: black;
+}
+
+
+.slide-deck {
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+  background-image: url(http://media.philly.com/images/20170203_inq_comcast03-a.JPG);
+  background-size: cover;
+}
+
+
+.text-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.text-container-bottom {background: linear-gradient(to bottom,rgba(0,0,0,0) 50%,rgba(0,0,0,0.7));}
+.text-container-center {background: linear-gradient(to bottom,rgba(0,0,0,0) 50%,rgba(0,0,0,0.7));}
+.text-container-top {background: linear-gradient(to top,rgba(0,0,0,0) 50%,rgba(0,0,0,0.7));}
+.text-container-headline {background-color:rgba(0,0,0,0.5)}
+
+.text {
+  position: absolute;
+  padding: 50px;
+  width: 100%;
+}
+
+  .text-bottom {
+    bottom:0;
+  }
+
+  .text-center {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .text-top {
+    top:0;
+  }
+
+
+
+.text p {
+  font-size: 18px;
+  line-height: 1.6;
+  text-align: justify;
+  color: #ddd;
+  margin: 10px auto;
+  max-width: 500px;
+  text-shadow: 2px 2px 4px #000;
+  font-family: "Gotham Narrow SSm A","Gotham Narrow SSm B","Arial",sans-serif;
+}
+
+
+.text-headline {
+  top:30%;
+}
+
+.headline, .subhead, .byline, .publishDate, .credits {
+  text-shadow: 0 0 12px #000;
+  text-align: center;
+  color: #fff;
+}
+
+.headline, .byline, .credits {
+  font-family: "Gotham Narrow SSm A", "Gotham Narrow SSm B", "Arial", sans-serif;
+}
+
+.subhead, .publishDate {
+  font-family: "Sentinel SSm A","Sentinel SSm B",Times,"Times New Roman",serif;
+}
+
+.headline {
+  font-size: 60px;
+}
+
+.subhead {
+  font-size: 30px;
+  margin-top: -15px;
+}
+
+.byline {
+  font-size: 16px;
+  padding-top: 20px;
+}
+
+.publishDate {
+  font-size: 14px;
+  font-weight: lighter;
+  font-style: italic;
+  padding-top: 10px;
+}
+
+.credits {
+  font-size: 16px;
+}
+
+.controls-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  color: white;
+  z-index: 3;
+  font-size: 35px;
+  opacity: 0.5;
+}
+
+.start {
+  margin:0 auto;
+  height: 40px;
+  width: 100px;
+  opacity: 0.7;
+  border: none;
+  border-radius: 30px;
+  background-color: #B63321;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.8;
+  margin:30px auto 0;
+  display:block;
+}
+
+.start:hover {opacity:1;}
+
+
+#next {
+  right:2%;
+}
+
+#prev {
+  left:2%;
+}
+
+.control-button {
+  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+  opacity: 0.8;
+  display: inline-block;
+  border-radius: 3px;
+  width: 40px;
+  height: 120px;
+  line-height: 1.3;
+  border: 0.5px solid rgba(194, 194, 194, 0.80);
+  cursor: pointer;
+  background-color: rgba(194, 194, 194, 0.70);
+}
+
+.control-button span,
+.mute-button span {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    width: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.control-button:hover {
+    opacity: 1;
+    background-color: rgba(194, 194, 194, 0.90);
+}
+&lt;/style&gt
+
+&lt;div class="slide-deck-container"&gt;
+    &lt;div class="controls-container"&gt;
+        &lt;div alignment="true" id="prev" class="control-button prev hiddenB"&gt;&lt;span class="glyphicon glyphicon-menu-left"&gt;&nbsp;&lt;/span&gt;&lt;/div&gt;
+        &lt;div alignment="true" id="next" class="control-button next"&gt;&lt;span class="glyphicon glyphicon-menu-right"&gt;&nbsp;&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="slide-deck"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous"&gt;
+&lt;script src="http://media.philly.com/storage/inquirer/Longform/Bootstrap/js/bootstrap.min.js"&gt;&lt;/script&gt;
+</textarea>
+            </div>
